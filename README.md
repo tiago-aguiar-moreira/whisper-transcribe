@@ -32,12 +32,37 @@ Language detected: pt (98.50%)
 [10min] Sed do eiusmod tempor...
 ```
 
+> **Language & noise handling:** Both scripts are configured to transcribe in Portuguese (`pt`) by default, avoiding misdetection caused by instrumental music or noise at the beginning/end of recordings. A VAD (Voice Activity Detection) filter is also applied to suppress non-speech segments such as background noise and music, improving transcription accuracy.
+
 ## Requirements
 
 - Python 3.9+
 - NVIDIA GPU (optional, but recommended for faster processing)
-  - CUDA Toolkit 12
-  - cuBLAS and cuDNN DLLs ([Purfview package for Windows](https://github.com/Purfview/whisper-standalone-win/releases/tag/libs))
+  - [CUDA Toolkit 12](https://developer.nvidia.com/cuda-toolkit-archive) — see below how to identify the right version for your hardware
+  - [cuBLAS and cuDNN DLLs](https://github.com/Purfview/whisper-standalone-win/releases/tag/libs) — download `cuBLAS.and.cuDNN_CUDA12_win_v3.7z` (Purfview package for Windows)
+
+### Identifying the right CUDA version for your hardware
+
+Run the following command to check your driver and the maximum supported CUDA version:
+
+```bash
+nvidia-smi
+```
+
+Look for the **CUDA Version** field in the top-right corner of the output:
+
+```
+| NVIDIA-SMI 596.36   Driver Version: 596.36   CUDA Version: 13.2 |
+```
+
+> This value indicates the **maximum CUDA version your driver supports** — it does not mean the CUDA Toolkit is installed, only that your driver is compatible up to that version.
+
+Since faster-whisper requires **CUDA 12**, check if your driver supports it:
+
+- `CUDA Version >= 12.0` → you can install CUDA Toolkit 12 ✅
+- `CUDA Version < 12.0` → you need to update your NVIDIA driver first before proceeding ❌
+
+On the [CUDA Toolkit Archive](https://developer.nvidia.com/cuda-toolkit-archive) page, select any **12.x** version and the Windows installer. The latest 12.x release is recommended.
 
 ## Setup
 
@@ -66,7 +91,7 @@ Navigate to the directory containing the audio files, then run the script:
 ```bash
 cd "E:\path\to\audio\files"
 .venv\Scripts\activate
-python C:\Users\tiago\workspace\Transcribe\transcribe.py
+python transcribe.py
 ```
 
 ### `transcribe_batch.py`
@@ -74,7 +99,7 @@ python C:\Users\tiago\workspace\Transcribe\transcribe.py
 Set `AUDIO_DIR` and `OUTPUT_DIR` at the top of the script, then run:
 
 ```bash
-cd C:\Users\tiago\workspace\Transcribe
+cd C:\path\to\Transcribe
 .venv\Scripts\activate
 python transcribe_batch.py
 ```
