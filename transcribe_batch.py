@@ -1,8 +1,8 @@
 import os
 from faster_whisper import WhisperModel
 
-AUDIO_DIR = r"E:\Vídeos\Workshop Desenvolvimento Assistido por IA Avançado"
-OUTPUT_DIR = r"C:\Users\tiago\workspace\transcript"
+AUDIO_DIR = os.getcwd()
+OUTPUT_DIR = os.getcwd()
 MODEL_SIZE = "small"
 DEVICE = "cpu"
 COMPUTE_TYPE = "int8"
@@ -57,7 +57,7 @@ def transcribe(model, audio_file, output_file):
     print(f"Salvo em: {output_file}")
 
 
-# Coleta todos os arquivos .m4a do diretório
+# Coleta todos os arquivos .m4a do diretório atual
 audio_files = sorted([
     os.path.join(AUDIO_DIR, f)
     for f in os.listdir(AUDIO_DIR)
