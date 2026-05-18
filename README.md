@@ -14,11 +14,11 @@ Interactive script for transcribing a single audio file.
 - Saves the output `.txt` in the same directory where the script is executed
 
 ### `transcribe_batch.py`
-Batch script for transcribing all audio files in a configured directory.
+Batch script for transcribing all audio files in the current directory.
 
 - Skips files that have already been transcribed
 - Loads the model once and reuses it across all files
-- Saves output `.txt` files to the configured output directory
+- Saves output `.txt` files in the same directory where the script is executed
 
 ## Output format
 
@@ -69,7 +69,7 @@ On the [CUDA Toolkit Archive](https://developer.nvidia.com/cuda-toolkit-archive)
 **1. Create and activate the virtual environment**
 
 ```bash
-cd C:\path\to\Transcribe
+cd C:\path\to\whisper-transcribe
 python -m venv .venv
 .venv\Scripts\activate
 ```
@@ -84,22 +84,20 @@ pip install faster-whisper
 
 ## Running
 
+Both scripts read audio files from and save transcriptions to the directory where they are executed.
+
 ### `transcribe.py`
 
-Navigate to the directory containing the audio files, then run the script:
-
 ```bash
-cd "E:\path\to\audio\files"
+cd "path\to\audio\files"
 .venv\Scripts\activate
 python transcribe.py
 ```
 
 ### `transcribe_batch.py`
 
-Set `AUDIO_DIR` and `OUTPUT_DIR` at the top of the script, then run:
-
 ```bash
-cd C:\path\to\Transcribe
+cd "path\to\audio\files"
 .venv\Scripts\activate
 python transcribe_batch.py
 ```
