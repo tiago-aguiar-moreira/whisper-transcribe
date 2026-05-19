@@ -8,6 +8,7 @@ DEVICE = "cpu"
 COMPUTE_TYPE = "int8"
 LANGUAGE = "pt"
 TIME_MARK_INTERVAL = 300  # marcador de tempo a cada 5 minutos (em segundos)
+CHUNK_LENGTH = 30          # processa o áudio em pedaços de 30 segundos (reduz uso de RAM)
 
 
 def get_output_filename(audio_file):
@@ -26,6 +27,7 @@ def transcribe(model, audio_file, output_file):
         language=LANGUAGE,
         vad_filter=True,
         vad_parameters=dict(min_silence_duration_ms=500),
+        chunk_length=CHUNK_LENGTH,
     )
 
     print(f"Idioma: {info.language} ({info.language_probability:.2%})")
