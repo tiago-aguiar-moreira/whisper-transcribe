@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 from faster_whisper import WhisperModel
 
 AUDIO_DIR = os.getcwd()
@@ -85,9 +86,18 @@ if not pending:
 print(f"\nCarregando modelo '{MODEL_SIZE}'...")
 model = WhisperModel(MODEL_SIZE, device=DEVICE, compute_type=COMPUTE_TYPE)
 
+start_time = datetime.now()
+
 for i, audio_file in enumerate(pending, start=1):
     output_file = get_output_filename(audio_file)
     print(f"\n[{i}/{len(pending)}] {os.path.basename(audio_file)}")
     transcribe(model, audio_file, output_file)
 
+end_time = datetime.now()
+
 print("\nLote concluído!")
+print("-" * 60)
+print(f"  Início    : {start_time.strftime('%d/%m/%Y %H:%M:%S')}")
+print(f"  Fim       : {end_time.strftime('%d/%m/%Y %H:%M:%S')}")
+print(f"  Duração   : {str(end_time - start_time).split('.')[0]}")
+print("-" * 60)
