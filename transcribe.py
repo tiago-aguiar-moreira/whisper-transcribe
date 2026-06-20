@@ -5,11 +5,12 @@ from faster_whisper import WhisperModel
 AUDIO_DIR = os.getcwd()
 OUTPUT_DIR = os.getcwd()
 MODEL_SIZE = "small"
-DEVICE = "cpu"
+DEVICE = "cuda"
 COMPUTE_TYPE = "int8"
 LANGUAGE = "pt"
 TIME_MARK_INTERVAL = 300  # marcador de tempo a cada 5 minutos (em segundos)
 CHUNK_LENGTH = 30          # processa o áudio em pedaços de 30 segundos (reduz uso de RAM)
+AUDIO_EXTENSIONS = (".mp3", ".m4a", ".wav", ".flac", ".ogg", ".opus", ".aac", ".wma", ".mp4", ".mkv", ".webm")
 
 
 def get_output_filename(audio_file):
@@ -64,7 +65,7 @@ def transcribe(model, audio_file, output_file):
 audio_files = sorted([
     os.path.join(AUDIO_DIR, f)
     for f in os.listdir(AUDIO_DIR)
-    if f.endswith(".m4a")
+    if f.endswith(AUDIO_EXTENSIONS)
 ])
 
 if not audio_files:
