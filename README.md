@@ -102,6 +102,17 @@ cd "path\to\audio\files"
 python transcribe_batch.py
 ```
 
+### `transcribe_batch.bat` (atalho para Windows)
+
+Alternativa ao método acima: cria o venv e instala o `faster-whisper` automaticamente se necessário, então executa o `transcribe_batch.py`. Ideal para uso recorrente sem precisar abrir o terminal e ativar o ambiente manualmente.
+
+```bat
+cd "path\to\audio\files"
+"S:\workspace\whisper-transcribe\transcribe_batch.bat"
+```
+
+> O `.bat` usa `%~dp0` para localizar o venv e o script — ambos ficam no diretório do repositório. O diretório de trabalho (onde estão os áudios) é controlado pelo `cd` feito antes de chamá-lo.
+
 ## Configuration
 
 Both scripts expose constants at the top of the file for easy customization:

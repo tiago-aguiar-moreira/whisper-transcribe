@@ -17,6 +17,13 @@ python S:\workspace\whisper-transcribe\transcribe.py       # interactive, one fi
 python S:\workspace\whisper-transcribe\transcribe_batch.py # batch, all pending
 ```
 
+`transcribe_batch.bat` is a Windows convenience launcher for the batch script: auto-creates the `.venv` and installs `faster-whisper` if missing, then runs `transcribe_batch.py`. Call it from the audio directory the same way:
+
+```bat
+cd "path\to\audio\files"
+"S:\workspace\whisper-transcribe\transcribe_batch.bat"
+```
+
 ## Setup
 
 ```bash
