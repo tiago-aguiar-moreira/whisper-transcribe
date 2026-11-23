@@ -7,11 +7,8 @@ if not exist "%~dp0.venv\Scripts\activate.bat" (
 
 call "%~dp0.venv\Scripts\activate.bat"
 
-python -c "import faster_whisper" 2>nul
-if errorlevel 1 (
-    echo Instalando faster-whisper...
-    pip install faster-whisper
-)
+rem Instala/corrige as dependencias nas versoes fixadas (rapido quando ja estao ok)
+pip install -q -r "%~dp0requirements.txt"
 
-python "%~dp0transcribe_batch.py"
+python "%~dp0transcribe_batch.py" %*
 pause

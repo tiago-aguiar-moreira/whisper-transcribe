@@ -7,22 +7,39 @@ Python scripts for automatic audio transcription using [faster-whisper](https://
 ### `transcribe.py`
 Interactive script for transcribing a single audio file.
 
-- Lists all `.m4a` files found in the current directory
-- Indicates which files have already been transcribed
+- Lists all audio files found in the current directory
+- Indicates which files have already been transcribed (all requested outputs exist)
 - Prompts the user to select a file by number
 - Asks for confirmation before overwriting an existing transcription
-- Saves the output `.txt` in the same directory where the script is executed
+- Saves the outputs in the same directory where the script is executed
 
 ### `transcribe_batch.py`
 Batch script for transcribing all audio files in the current directory.
 
 - Skips files that have already been transcribed
 - Loads the model once and reuses it across all files
-- Saves output `.txt` files in the same directory where the script is executed
+- A failure in one file (e.g. corrupted audio, CUDA error) is logged and the batch continues; the final summary lists the failures
+- Saves the outputs in the same directory where the script is executed
+
+### Common behaviour
+
+- **Output selection:** `--srt` and/or `--words` choose the extra outputs. The `.txt` is always generated; with neither flag, both `.srt` and `.words.json` are generated.
+- **Atomic writes:** outputs are written to `.tmp` files and only renamed at the end, so an error or Ctrl+C never leaves a truncated transcription behind.
+- **Progress:** the console shows `... 15min de 72min` every 5 minutes of audio, plus the time spent on each file.
+- **Log:** each run writes `logs\AAAA-MM-DD_HH-MM-SS.log` in the repository folder, with a timestamp on every line and the full traceback of any failure.
+- **Exit codes:** `0` ok, `1` some file failed (batch), `2` fatal error, `130` interrupted.
 
 ## Output format
 
-Both scripts generate a plain text file with time markers every 5 minutes, optimized for LLM consumption:
+| File | Content |
+|---|---|
+| `<name>-transcript.txt` | Plain text with time markers every 5 minutes (always generated) |
+| `<name>-transcript.srt` | SubRip subtitle, one block per segment (`--srt`) |
+| `<name>-transcript.words.json` | Segments with the start/end time and probability of every word (`--words`) |
+
+A `-new` suffix at the end of the audio name is dropped: `20260516-1-new.m4a` → `20260516-1-transcript.*`.
+
+The `.txt` is optimized for LLM consumption:
 
 ```
 Language detected: pt (98.50%)
@@ -30,6 +47,29 @@ Language detected: pt (98.50%)
 [0min] Lorem ipsum dolor sit amet...
 [5min] Consectetur adipiscing elit...
 [10min] Sed do eiusmod tempor...
+```
+
+The `.words.json` keeps one word per line so it can be read or corrected in an editor:
+
+```json
+{
+  "version": 1,
+  "language": "pt",
+  "language_probability": 0.987,
+  "source": "20260516-1-new.m4a",
+  "duration": 4773.889,
+  "segments": [
+    {
+      "start": 13.49,
+      "end": 18.91,
+      "text": "Seja bem-vindo.",
+      "words": [
+        {"start": 13.49, "end": 13.71, "word": "Seja", "probability": 0.981},
+        {"start": 13.75, "end": 14.2, "word": "bem-vindo.", "probability": 0.9}
+      ]
+    }
+  ]
+}
 ```
 
 > **Language & noise handling:** Both scripts are configured to transcribe in Portuguese (`pt`) by default, avoiding misdetection caused by instrumental music or noise at the beginning/end of recordings. A VAD (Voice Activity Detection) filter is also applied to suppress non-speech segments such as background noise and music, improving transcription accuracy.
@@ -77,8 +117,10 @@ python -m venv .venv
 **2. Install dependencies**
 
 ```bash
-pip install faster-whisper
+pip install -r requirements.txt
 ```
+
+> Versions are pinned: `faster-whisper==1.2.1` and `av<18` (PyAV 19 removed `metadata_errors`, still used by faster-whisper 1.2.1).
 
 > FFmpeg does not need to be installed separately. The PyAV library includes it.
 
@@ -99,12 +141,14 @@ python transcribe.py
 ```bash
 cd "path\to\audio\files"
 .venv\Scripts\activate
-python transcribe_batch.py
+python transcribe_batch.py           # .txt + .srt + .words.json
+python transcribe_batch.py --srt     # .txt + .srt
+python transcribe_batch.py --words   # .txt + .words.json
 ```
 
 ### `transcribe_batch.bat` (atalho para Windows)
 
-Alternativa ao método acima: cria o venv e instala o `faster-whisper` automaticamente se necessário, então executa o `transcribe_batch.py`. Ideal para uso recorrente sem precisar abrir o terminal e ativar o ambiente manualmente.
+Alternativa ao método acima: cria o venv e instala/corrige as dependências de `requirements.txt` automaticamente, então executa o `transcribe_batch.py` repassando os argumentos (ex.: `transcribe_batch.bat --srt`). Ideal para uso recorrente sem precisar abrir o terminal e ativar o ambiente manualmente.
 
 ```bat
 cd "path\to\audio\files"
@@ -119,8 +163,9 @@ Both scripts expose constants at the top of the file for easy customization:
 
 | Constant | Description | Default |
 |---|---|---|
-| `MODEL_SIZE` | Whisper model to use (`tiny`, `small`, `medium`, `large-v3`, `turbo`) | `small` |
-| `DEVICE` | Inference device (`cpu` or `cuda`) | `cpu` |
-| `COMPUTE_TYPE` | Numeric precision (`int8`, `float16`, `int8_float16`) | `int8` |
+| `MODEL_SIZE` | Whisper model to use (`tiny`, `small`, `medium`, `large-v3`, `turbo`) | `turbo` |
+| `DEVICE` | Inference device (`cpu` or `cuda`) | `cuda` |
+| `COMPUTE_TYPE` | Numeric precision (`int8` for CPU, `float16` / `int8_float16` for GPU) | `float16` |
 | `LANGUAGE` | Audio language code | `pt` |
-| `TIME_MARK_INTERVAL` | Time marker interval in seconds | `300` (5 min) |
+| `TIME_MARK_INTERVAL` | Time marker interval in the `.txt`, in seconds | `300` (5 min) |
+| `PROGRESS_INTERVAL` | Seconds of audio between console progress lines | `300` (5 min) |
